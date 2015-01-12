@@ -252,11 +252,9 @@ install_freeswitch_for_astpp () {
     
     # Download latest freeswitch version
     cd /usr/local/src
-    #git clone git://git.freeswitch.org/freeswitch.git
-    wget http://files.freeswitch.org/freeswitch-1.2.8.tar.bz2
-    tar -xvf freeswitch-1.2.8.tar.bz2
-    cd freeswitch-1.2.8
-    #./bootstrap.sh
+    git clone https://stash.freeswitch.org/scm/fs/freeswitch.git
+    cd freeswitch
+    ./bootstrap.sh
 
     read -n 1 -p "Press any key to continue ... "
 
