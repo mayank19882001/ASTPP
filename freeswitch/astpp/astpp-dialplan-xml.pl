@@ -17,7 +17,14 @@ sub xml_process()
     
     $xml = header( -type => 'text/plain' );
     $void_xml = &void_xml();
-    
+
+    #our custom code to strip + or leading 00
+     if ( $params->{'Caller-Destination-Number'}=~ m/^(00|\+)?(\d+)$/) {
+           $params->{'Caller-Destination-Number'} = $2;
+           $ASTPP->debug(debug => "Stripped + or 00 Result: $2");
+      }
+ 
+
     $astppdid = "ASTPP-STANDARD";  
     #Check if dialed number is DID number.
     $didinfo = &get_did($astpp_db, $params->{'Caller-Destination-Number'});
@@ -121,7 +128,7 @@ sub xml_process()
 	  exit(0);
 	}  
     }   
-    
+     $ASTPP->debug( debug => "checking inuse and max channels: $astppdid " );
     #If dialed number is not DID number, then calculate in use count for account
     if(!defined $astppdid && $astppdid ne "ASTPP-DID")
     {
@@ -136,6 +143,7 @@ sub xml_process()
 	    print $void_xml;
 	    exit(0);
 	}
+ $ASTPP->debug( debug => "updating inuse count by +1 " );
 	&update_inuse($astpp_db,$params->{variable_accountcode},'accounts','+1','+'.$config->{min_channel_balance});
 	$carddata->{balance} += $config->{min_channel_balance};
     }    
