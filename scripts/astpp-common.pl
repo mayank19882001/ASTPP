@@ -142,9 +142,9 @@ sub get_outbound_routes() {
 	} 
  	$tmp .= " AND outbound_routes.status = 1  
 			    ORDER BY 
-				outbound_routes.precedence DESC, 
-				outbound_routes.cost,
-				outbound_routes.precedence,
+				LENGTH(pattern) DESC,
+				outbound_routes.cost ASC,
+				outbound_routes.precedence DESC,
 				trunks.precedence ";
 	$sql = $astpp_db->prepare($tmp);
 	$sql->execute;
@@ -766,11 +766,18 @@ sub max_length() {
 	if ($branddata->{markup} > 0) {
 		$numdata->{cost} = $numdata->{cost} + ( ($branddata->{markup} * $numdata->{cost}) / 100 )
 	}	
+		$ASTPP->debug(debug =>"numdata->cost : ".$numdata->{cost});
+		
 	if ( $numdata->{cost} > 0 ) {
 		$maxlength = int ( ( $credit - $numdata->{connectcost} ) / $numdata->{cost} );
-		if ($config->{call_max_length} && ($maxlength > $config->{call_max_length} / 1000)){
+			$ASTPP->debug(debug =>"MAX_LENGTH_ORIGINAL : ".$maxlength);
+			$ASTPP->debug(debug =>"config->{call_max_length} : ".$config->{call_max_length});
+			$ASTPP->debug(debug =>"config->{call_max_length}/1000/60 : ".$config->{call_max_length}/1000/60);
+			
+		if ($config->{call_max_length} && ($maxlength > $config->{call_max_length} / 1000/60)){
 			$ASTPP->debug(debug =>"LIMITING CALL TO CONFIG MAX LENGTH \n");
 		        $maxlength = $config->{call_max_length} / 1000 / 60;
+		        $ASTPP->debug(debug =>"MAX_LENGTH_LIMIT due to config : ".$maxlength);
 		}
 	}
 	else {		
@@ -1281,7 +1288,7 @@ sub get_all_currency() {
 sub update_inuse() {  
         my ( $astpp_db, $cardnumber,$table , $count,$res_balance ) = @_;
         my $sql = "UPDATE $table SET inuse = inuse $count WHERE number = ". $astpp_db->quote( $cardnumber );
-	$ASTPP->debug(debug =>"$sql");
+	$ASTPP->debug(debug =>$sql);
         $astpp_db->do($sql);
 	
 	if($table eq 'accounts')
