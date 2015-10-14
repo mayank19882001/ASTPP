@@ -1404,6 +1404,10 @@ sub void_xml()
     return $void_xml;
 }
 
+#added instatalk
+use Try::Tiny;
+#added instatalk
+
 sub clean_cdr_data()
 {
    my ($data) = @_;
@@ -1418,7 +1422,17 @@ sub clean_cdr_data()
    }else{
       $cleandata->{src} = uri_unescape($data->{callflow}->{caller_profile}->{caller_id_number});   
       $cleandata->{uniqueid} = uri_unescape($data->{callflow}->{caller_profile}->{uuid});
-      $cleandata->{trunkip} = uri_unescape($data->{callflow}->{caller_profile}->{originatee}->{originatee_caller_profile}->{network_addr});  
+      #$cleandata->{trunkip} = uri_unescape($data->{callflow}->{caller_profile}->{originatee}->{originatee_caller_profile}->{network_addr});  
+
+
+	try {
+      	  $cleandata->{trunkip} = uri_unescape($data->{callflow}->{caller_profile}->{originatee}->{originatee_caller_profile}->{network_addr});  
+	} catch {
+     	  $cleandata->{trunkip}="127.0.0.1";
+	};
+
+
+      
       $cleandata->{context} = uri_unescape($data->{callflow}->{caller_profile}->{context});
       $cleandata->{rdnis} = uri_unescape($data->{callflow}->{caller_profile}->{rdnis});
    }
